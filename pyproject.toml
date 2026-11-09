@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpusec"
+version = "0.1.0"
+description = "Static security analysis for CUDA kernels"
+requires-python = ">=3.9"
+
+[project.scripts]
+gpusec = "gpusec.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["gpusec*"]

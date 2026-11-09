@@ -1,0 +1,30 @@
+name: GPUsec
+on: [push, pull_request]
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install .
+      - name: Static analysis (fails the job on HIGH findings)
+        run: gpusec scan . --format sarif --output gpusec.sarif --fail-on high
+      - name: Upload to GitHub code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with: { sarif_file: gpusec.sarif }
+
+  # Optional dynamic stage: needs a runner with an NVIDIA GPU and the CUDA toolkit.
+  # dynamic:
+  #   runs-on: [self-hosted, gpu]
+  #   needs: static
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: nvcc -lineinfo -o app src/main.cu
+  #     - run: gpusec sanitize --tools memcheck,racecheck,synccheck -- ./app
+  #     - run: gpusec scan src --sanitizer-log sanitizer.log --fail-on high
